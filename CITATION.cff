@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below, and credit the data providers listed in README.md."
+title: "FITS Archive Search (Ricerca archivi FITS): search and download telescope FITS images by object name from MAST, IRSA, Chandra and ESO"
+authors:
+  - family-names: Battistel
+    given-names: Edoardo
+version: "1.11"
+date-released: 2026-11-09
+license: BSD-3-Clause
+repository-code: "https://github.com/EDOKILLER/fits-archive-search"
+keywords:
+  - FITS
+  - archives
+  - MAST
+  - IRSA
+  - ESO
+  - Chandra
+  - virtual observatory

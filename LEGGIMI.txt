@@ -1,0 +1,185 @@
+RICERCA ARCHIVI FITS 1.11 - cerca e scarica immagini dei telescopi
+=================================================================
+© 2026 Edoardo Battistel
+
+Contenuto di questa cartella
+----------------------------
+  ricerca_archivi.py           il programma (finestra per Ubuntu e Windows 11)
+  crea_eseguibile_ubuntu.sh    crea l'eseguibile per Ubuntu
+  crea_eseguibile_windows.bat  crea RicercaArchiviFITS.exe per Windows 11
+  openngc_compatto.csv         catalogo NGC/IC/Messier con nomi comuni (funziona senza Internet)
+  OpenNGC_licenza_CC-BY-SA-4.0.txt  licenza del catalogo (OpenNGC di Mattia Verga)
+
+Creare l'eseguibile (una volta per sistema operativo)
+----------------------------------------------------
+UBUNTU, nel terminale:
+    cd ~/Claude/Astropy/programma_ricerca_archivi/versione_1.11
+    bash crea_eseguibile_ubuntu.sh
+WINDOWS 11: installa Python da python.org ("Add python.exe to PATH"),
+    poi doppio clic su crea_eseguibile_windows.bat
+
+Alla fine lo script esegue:
+  - l'AUTOTEST (senza rete): deve dire "AUTOTEST SUPERATO";
+  - la DIAGNOSTICA: prova una per una le fonti dei nomi (Sesame, NED,
+    Wikipedia/Wikidata, SIMBAD) e interroga davvero ogni archivio cercando
+    NGC 346; scrive in diagnostica.txt cosa funziona dalla tua rete.
+
+Archivi interrogati
+-------------------
+  MAST (STScI)   JWST, HST, GALEX, Swift UVOT, Pan-STARRS, Spitzer
+  IRSA (Caltech) Euclid Q1 (mosaici MER); a scelta Spitzer, WISE, 2MASS, ...
+  Chandra (CXC)  immagini a campo intero in raggi X
+  ESO            prodotti ridotti dei telescopi a terra (VLT, VISTA, VST)
+Solo dati pubblici: nessun account necessario.
+
+Come si usa
+-----------
+1) "Cartella dati": dove salvare (es. ~/Scrivania/Astronomia). Si cambia con
+   "Scegli...". Le sottocartelle vengono create da sole:
+        <cartella dati>/<OGGETTO>/<TELESCOPIO>/file.fits
+   per esempio  Astronomia/M_1/JWST/   Astronomia/M_1/HST/   Astronomia/M_1/CHANDRA/
+   (dalla 1.5; prima era <TELESCOPIO>/<OGGETTO>/). I file già scaricati con
+   la struttura vecchia non vengono riscaricati: premendo "Scarica" vengono
+   spostati nella cartella nuova.
+   Se esiste già una cartella con lo stesso nome (anche con maiuscole diverse)
+   viene riusata.
+2) Scrivi il nome (NGC 346, IC 1234, M 42...) oppure incolla le coordinate,
+   per esempio da Wikipedia:  00h 59m 05.090s −72° 10′ 33.24″
+   Se scrivi sia nome sia coordinate: le coordinate servono per la ricerca,
+   il nome per la cartella.
+3) "Cerca". La colonna "Contiene" dice se l'impronta dell'immagine contiene
+   le coordinate dell'oggetto (sì / no / ? se l'archivio non la fornisce).
+   Di default i file che NON lo contengono sono nascosti.
+   Dopo il download diventa "sì ✓" se confermato dal WCS del file.
+4) Spunta i file (clic sulla riga o barra spaziatrice) e "Scarica selezionati".
+   Clic sul titolo di una colonna = ordina.
+
+Novità della 1.11
+  Pan-STARRS: MAST indica già l'indirizzo web del file (ps1images.stsci.edu);
+  il programma lo passava al servizio di download di MAST, che rispondeva
+  "HTTP Error 400: Bad Request". Ora lo usa direttamente (MAST come riserva),
+  e prova a leggere anche la dimensione dei file.
+  Icona nella barra di Ubuntu: StartupWMClass=Ricercaarchivifits (Tk scrive
+  la classe della finestra con solo la prima lettera maiuscola).
+
+Novità della 1.10
+  - Un archivio che non risponde (es. Euclid su IRSA) non blocca più la
+    ricerca: dopo 3 minuti viene segnato "nessuna risposta" e si vedono i
+    risultati degli altri. Ogni 30 s il registro dice chi si sta ancora
+    aspettando; "Interrompi" funziona anche durante l'attesa. Nessuna
+    connessione resta appesa per più di 2 minuti senza dati.
+  - Il titolo della finestra mostra la versione (es. "Ricerca archivi FITS 1.10").
+  - Icona nella barra di Ubuntu: il collegamento ora si chiama
+    RicercaArchiviFITS.desktop, come la finestra. Lo script aggiorna anche il
+    percorso salvato da Atlante Celeste / Atomo Celeste / Via Lattea 3D, se
+    puntava a una versione vecchia (senza icona: compariva l'ingranaggio).
+
+Novità della 1.9
+  Icona propria: una lente d'ingrandimento che inquadra una nebulosa, davanti a
+  una pila di fotogrammi «FITS», su fondo verde petrolio stellato
+  (ricerca_archivi.png 512 px per Ubuntu, ricerca_archivi.ico per Windows).
+  Compare nel menu delle applicazioni, sulla Scrivania, nella barra di Ubuntu
+  e nella finestra. crea_icona.py la ridisegna se serve.
+
+Novità della 1.8
+  Frontier Fields, CANDELS e LEGUS: MAST indica come indirizzo l'Hubble
+  Legacy Archive (hla.stsci.edu/cgi-bin/getdata.cgi?dataset=...). Il
+  programma prova quell'indirizzo e le sue varianti, poi l'archivio statico
+  di STScI (archive.stsci.edu/hlsps/... e /pub/hlsp/...), e usa il primo che
+  manda davvero un FITS. Se nessuno funziona, la diagnostica dei mosaici
+  scrive cosa ha risposto ogni indirizzo.
+
+Novità della 1.7 (unisce le due 1.6 dell'8/11 sera)
+  - Controllo dei file scaricati: un FITS deve iniziare con «SIMPLE» (o essere
+    .gz), un ASDF con «#ASDF», PNG e JPEG con la loro firma. Se il server
+    manda un messaggio d'errore al posto del file, il programma lo cancella,
+    scrive il messaggio nel registro e prova l'indirizzo successivo.
+  - Anche i file già presenti ma non validi vengono riscaricati.
+  - Se arriva meno del 98% della dimensione attesa è un errore: il .part
+    resta e il tentativo successivo riprende da lì.
+  - HLSP: per gli altri indirizzi «mast:HLSP/...» c'è come riserva
+    https://archive.stsci.edu/hlsps/...
+
+Mosaici Hubble vecchi (dalla 1.6)
+  I mosaici Hubble più vecchi (Frontier Fields, XDF, CANDELS, LEGUS) su MAST
+  hanno un indirizzo che il servizio di download non sa servire: arrivava un
+  messaggio d'errore di 20 byte al posto del file. Ora il programma prova gli
+  indirizzi dell'archivio di STScI (archive.stsci.edu/pub/hlsp/...) e tiene il
+  primo che manda davvero un FITS. Se arriva comunque un messaggio al posto del
+  file, lo cancella, lo scrive nel registro e prova l'indirizzo successivo.
+
+Mosaici consigliati (novità della 1.4)
+  Il pulsante "🌌 Mosaici consigliati" apre un elenco di mosaici già pronti
+  (livello 4, HLSP: preparati dai gruppi di ricerca) con tanti oggetti nel
+  campo e tre filtri dal blu al rosso, da trasformare in un'immagine a colori
+  con AutoAstroPipe:
+    Hubble  Frontier Fields (Abell 2744, MACS J0416, MACS J1149), XDF,
+            CANDELS GOODS-S, LEGUS (NGC 628, NGC 1566)
+    JWST    GLASS (Abell 2744), PHANGS-JWST MIRI (NGC 628, NGC 1566),
+            CEERS, JADES GOODS-S
+    Hubble + JWST  Abell 2744: F435W e F814W di Hubble, F444W di GLASS
+    Roman   elenca le immagini pubbliche (formato ASDF, che AutoAstroPipe
+            per ora non legge)
+  Scegli una riga e premi "Trova i file" (o doppio clic): il programma cerca
+  su MAST e mette nella tabella un mosaico per filtro, già spuntato.
+  Poi "Scarica selezionati". I file vanno in
+        <cartella dati>/Mosaico_<nome>/<TELESCOPIO>/   (es. Mosaico_HFF_Abell_2744/HST/)
+  In AutoAstroPipe scegli come cartella madre Mosaico_<nome>: si accorge
+  che i FITS sono nelle sottocartelle e propone di copiarli.
+  Attenzione:
+    - alcuni mosaici sono enormi: GLASS ~2 GB, CEERS ~1,2 GB, JADES ~10 GB per
+      filtro. I file oltre 4 GB sono elencati SENZA spunta: spuntali tu se
+      vuoi. Per Hubble il programma sceglie prima 60 mas;
+    - scale diverse (Hubble + JWST) vanno bene: AutoAstroPipe riproietta tutto
+      sulla stessa griglia;
+    - i filtri ultravioletti di LEGUS (F275W, F336W) sono rumorosi e non
+      vengono usati;
+    - se un filtro manca, il registro lo dice e dice quali HLSP ci sono in
+      quel campo.
+  Per provare tutte le ricette dalla tua rete (scrive diagnostica_mosaici.txt):
+        python3 ricerca_archivi.py --diagnostica-mosaici > diagnostica_mosaici.txt
+
+Come vengono trovate le coordinate dal nome
+  Nel campo "Oggetto" puoi scrivere:
+    - un nome di catalogo: M 16, Messier 16, NGC 6611, IC 4703, NGC 346 ...
+    - un nome comune, in inglese o in italiano: Eagle Nebula, Nebulosa Aquila,
+      Pillars of Creation, Pilastri della Creazione, Galassia di Andromeda ...
+    - il link della voce di Wikipedia, per esempio
+      https://en.wikipedia.org/wiki/Pillars_of_Creation
+  Il programma prova queste fonti in ordine e si ferma alla prima che risponde:
+    1. soprannomi famosi e nomi italiani (tabella nel programma, senza Internet)
+    2. catalogo OpenNGC incluso: NGC, IC, Messier e nomi comuni (senza Internet)
+    3. NED (NASA/IPAC)
+    4. Wikidata / Wikipedia, in italiano e in inglese
+    5. Sesame (CDS di Strasburgo, poi copia di Harvard)
+    6. SIMBAD (al massimo 20 secondi di attesa)
+  Con un link di Wikipedia usa le coordinate della voce; se la voce non le
+  ha, cerca il titolo della voce con le altre fonti (es. Pillars of Creation).
+  Il registro dice quale fonte ha trovato l'oggetto e con quali coordinate.
+  La cartella dei file prende il nome scritto (dal link: il titolo della voce).
+
+Lista "Da cercare" (condivisa con Atlante Celeste)
+  Gli oggetti messi da parte in Atlante Celeste compaiono nella tendina
+  "⭐ Da cercare": scegline uno e nome e coordinate vengono compilati, poi Cerca.
+  "Rimuovi dalla lista" lo toglie. La lista è nel file ~/.lista_da_cercare_fits.json.
+  Il pulsante "Cerca i FITS ora" di Atlante Celeste apre questo programma e
+  avvia subito la ricerca dell'oggetto.
+
+Livello delle immagini
+  Di base vengono cercate solo immagini di LIVELLO 3 (combinate e già
+  ottimizzate, es. i2d di JWST, drz/drc di HST), per tutti gli archivi.
+  Con la casella "Includi anche il livello 2" si aggiungono le singole esposizioni.
+
+Salvataggi (solo quando lo chiedi tu)
+  "💾 Salva tabella CSV"   salva la tabella completa dove scegli
+                           (separatore ';', si apre con Excel / LibreOffice)
+  "Salva solo script"      crea in <cartella dati>/_ricerche_archivi/<OGGETTO>/
+                           scarica_<data>.sh (Ubuntu) e scarica_<data>.bat (Windows)
+  Casella "Crea lo script .sh/.bat a ogni download": se attiva, gli script
+  vengono creati automaticamente quando premi Scarica (di base è spenta).
+  Gli script si possono rilanciare quante volte serve: saltano i file già
+  completi e riprendono quelli interrotti. Anche "Scarica" nel programma
+  riprende i file parziali (estensione .part).
+
+Dimensione del testo: A− / A+ in alto a sinistra, oppure Ctrl + / Ctrl −.
+Se qualcosa non va, gli errori sono in ~/.ricerca_archivi_fits.log
